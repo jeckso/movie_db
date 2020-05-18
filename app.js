@@ -21,7 +21,7 @@ app.use(bodyparser.json())
 //app.use('/api', usersRouter);
 
 
-app.use('/api', movieRouter);
+app.use('/movie', movieRouter);
 
 //var mysqlConnection = mysql.createConnection('mysql://b3020c234f7bf9:c2f9aeec@eu-cdbr-west-02.cleardb.net/heroku_a055cf7e4179e62?reconnect=true');
   //  mysqlConnection.connect();
