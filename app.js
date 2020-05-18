@@ -9,6 +9,7 @@ const bodyparser = require('body-parser');
 
 
 var usersRouter = require('./routes/users');
+var movieRouter = require('./routes/movie');
 
 var app = express();
 var mysql = require("mysql");
@@ -17,7 +18,10 @@ app.use(bodyparser.urlencoded({ extended: false }))
 app.use(bodyparser.json())
 
 
-app.use('/api', usersRouter);
+//app.use('/api', usersRouter);
+
+
+app.use('/api', movieRouter);
 
 //var mysqlConnection = mysql.createConnection('mysql://b3020c234f7bf9:c2f9aeec@eu-cdbr-west-02.cleardb.net/heroku_a055cf7e4179e62?reconnect=true');
   //  mysqlConnection.connect();
