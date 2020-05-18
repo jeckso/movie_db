@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Подключение Bootstrap чтобы все выглядело красиво -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <title>Чат программа</title>
+    <!-- Свои стили -->
+    <style>
+        body {
+            background: #fcfcfc;
+        }
+    </style>
+</head>
+<body onload="ajax()">
+<!-- Создание меню на сайте (без функций) -->
+<!--<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">-->
+<!--    <h5 class="my-0 mr-md-auto">itProger</h5>-->
+<!--    <nav class="my-2 my-md-0 mr-md-3">-->
+<!--        <a class="p-2 text-dark" href="#">Главная</a>-->
+<!--        <a class="p-2 text-dark" href="#">Про нас</a>-->
+<!--        <a class="p-2 text-dark" href="#">Поддержка</a>-->
+<!--        <a class="p-2 text-dark" href="#">Цены</a>-->
+<!--    </nav>-->
+<!--    <a class="btn btn-outline-primary" href="#">Регистрация</a>-->
+<!--</div>-->
+<!-- Основная часть страницы -->
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>Чат программа</h2>
+        <p class="lead">Укажите ваше имя и начинайте переписку</p>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <!-- Форма для получения сообщений и имени -->
+            <h3>Форма сообщений</h3>
+            <form id="messForm" onsort="fet()">
+                <label for="name">Имя</label>
+                <input type="text" name="name" id="name" placeholder="Введите имя" class="form-control">
+                <br>
+                <label for="to_name">Получатель</label>
+                <input type="text" name="to_name" id="to_name" placeholder="Введите имя получателя или all"
+                       class="form-control" value="all">
+                <label for="message">Сообщение</label>
+                <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
+                <br>
+                <input type="button" value="Отправить" class="btn btn-danger" onclick="f()" >
+            </form>
+        </div>
+        <div class="col-6">
+            <h3>Сообщения</h3>
+            <!-- Вывод всех сообщений будет здесь -->
+            <div id="all_mess"></div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+    function ajax(){
+        var min = 1;
+        var max = 6;
+
+
+
+        document.getElementById('all_mess').innerHTML="";
+        var req=new XMLHttpRequest();
+        var $all_messages = $("#all_mess"); // Блок с сообщениями
+        req.onreadystatechange=function(){
+            if(req.readyState==4 && req.status==200){
+
+                var posts = JSON.parse(req.responseText);
+
+                console.log(posts);
+                posts.forEach(function (post)
+                {
+                    var random = Math.floor(Math.random() * (max - min)) + min;
+                    var alertClass;
+                    switch (random) {
+                        case 1:
+                            alertClass = 'secondary';
+                            break;
+                        case 2:
+                            alertClass = 'danger';
+                            break;
+                        case 3:
+                            alertClass = 'success';
+                            break;
+                        case 4:
+                            alertClass = 'warning';
+                            break;
+                        case 5:
+                            alertClass = 'info';
+                            break;
+                        case 6:
+                            alertClass = 'light';
+                            break;
+                    }
+                    $all_messages.append("<div class='alert alert-" + alertClass + "'><b>" + post.sender_name + "</b>: " + post.text_data + "</div>");
+
+                });
+               // document.getElementById('all_mess').innerHTML=req.responseText;
+
+            }
+
+        }
+       req.open('GET','https://chatkopp.herokuapp.com/api',true);
+        req.send();
+
+
+    }
+
+    // setInterval(function(){ajax()},1000);
+    function f() {
+        var $name = $("#name"); // Поле с именем
+        var $textarea = $("#message"); // Текстовое поле
+        var $all_messages = $("#all_mess"); // Блок с сообщениями
+        var req=new XMLHttpRequest();
+        var body = '$name=' + encodeURIComponent($name.val()) +
+            '&$message=' + encodeURIComponent($textarea.val());
+
+        req.open("POST",'https://chatkopp.herokuapp.com/api/',true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+
+
+        req.send(body);
+        ajax();
+
+
+    }
+</script>
+<!-- Подключаем jQuery, а также Socket.io -->
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+<!--&lt;!&ndash;<script src="/socket.io/socket.io.js"></script>&ndash;&gt;-->
+<!--<script>-->
+<!--    // У каждого пользователя будет случайный стиль для блока с сообщенями,-->
+<!--    // поэтому в этом кусочке кода мы получаем случайные числа-->
+
+
+<!--    function fet() {-->
+<!--        const proxyurl = "http://localhost:8010/proxy/api/";-->
+<!--        const url = "http://localhost:3000/api/";-->
+<!--        fetch( url,  {-->
+<!--            method: 'GET', // *GET, POST, PUT, DELETE, etc.-->
+<!--            mode: 'no-cors', // no-cors, cors, *same-origin-->
+<!--            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached-->
+<!--            credentials: 'same-origin', // include, *same-origin, omit-->
+<!--            headers: {-->
+
+
+<!--            },-->
+<!--            redirect: 'follow', // manual, *follow, error-->
+<!--            referrer: 'no-referrer', // no-referrer, *client-->
+<!--            // body: JSON.stringify(data), // тип данных в body должен соответвовать значению заголовка "Content-Type"-->
+<!--        })-->
+<!--    .-->
+<!--        then(response => response.json())-->
+<!--            .then(html => {-->
+<!--                // console.log(html);-->
+<!--                document.getElementById('all_mess').innerHTML = html;-->
+<!--            })-->
+<!--            .catch((err) => console.log("Can’t access " + url + " response. Blocked by browser?" + err));-->
+<!--    }-->
+
+<!--    // Функция для работы с данными на сайте-->
+<!--    $(function () {-->
+<!--        // Включаем socket.io и отслеживаем все подключения-->
+<!--        // var socket = io.connect();-->
+<!--        // // Делаем переменные на:-->
+<!--        var $form = $("#messForm"); // Форму сообщений-->
+<!--        // var $name = $("#name"); // Поле с именем-->
+<!--        // var $textarea = $("#message"); // Текстовое поле-->
+<!--        // var $all_messages = $("#all_mess"); // Блок с сообщениями-->
+
+<!--        // Отслеживаем нажатие на кнопку в форме сообщений-->
+
+
+<!--        $form.submit(function (event) {-->
+<!--            // Предотвращаем классическое поведение формы-->
+<!--            event.preventDefault();-->
+<!--            // В сокет отсылаем новое событие 'send mess',-->
+<!--            // в событие передаем различные параметры и данные-->
+<!--            fet();-->
+<!--            // socket.emit('send mess', {mess: $textarea.val(), name: $name.val(), className: alertClass});-->
+<!--            // // Очищаем поле с сообщением-->
+<!--            // $textarea.val('');-->
+<!--        });-->
+
+<!--        // Здесь отслеживаем событие 'add mess',-->
+<!--        // которое должно приходить из сокета в случае добавления нового сообщения-->
+<!--        // socket.on('add mess', function(data) {-->
+<!--        //     // Встраиваем полученное сообщение в блок с сообщениями-->
+<!--        //     // У блока с сообщением будет тот класс, который соответвует пользователю что его отправил-->
+<!--        //     $all_messages.append("<div class='alert alert-" + data.className + "'><b>" + data.name + "</b>: " + data.mess + "</div>");-->
+<!--        // });-->
+
+<!--    });-->
+<!--</script>-->
+</body>
+</html>
