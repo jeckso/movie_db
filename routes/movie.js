@@ -25,7 +25,12 @@ router.get('/', function (req, res) {
         ';\n', function (error, results, fields) {
             if (error) throw error;
             console.log(results);
-            res.send(results);
+            var o = {} // empty Object
+            var key = 'results';
+            o[key] = results; // empty Array, which you can push() values into
+            console.log(o[key]);
+
+            res.send(JSON.stringify(o));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
