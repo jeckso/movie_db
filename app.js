@@ -18,7 +18,7 @@ app.use(bodyparser.urlencoded({ extended: false }))
 app.use(bodyparser.json())
 
 
-//app.use('/api', usersRouter);
+app.use('/api', usersRouter);
 
 
 app.use('/movie', movieRouter);
