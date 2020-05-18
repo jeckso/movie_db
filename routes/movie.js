@@ -27,6 +27,10 @@ router.get('/', function (req, res) {
             console.log(results);
             var o = {} // empty Object
             var key = 'results';
+            o["page"] =1;
+            o["total_results"] =2;
+            o["total_pages"] =1;
+
             o[key] = results; // empty Array, which you can push() values into
             console.log(o[key]);
 
