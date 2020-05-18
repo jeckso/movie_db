@@ -2,10 +2,10 @@ const util = require('util')
 const mysql = require('mysql')
 const pool = mysql.createPool({
     connectionLimit: 10,
-    host: 'eu-cdbr-west-02.cleardb.net',
-    user: 'b3020c234f7bf9',
-    password: 'c2f9aeec',
-    database: 'heroku_a055cf7e4179e62'
+    host: 'us-cdbr-east-06.cleardb.net',
+    user: 'b9be144e623c5c',
+    password: '9951c39b',
+    database: 'heroku_c4d44064cd0699e'
 })
 
 // Ping database to check for common exception errors.
