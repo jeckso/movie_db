@@ -21,9 +21,9 @@ router.post('/login', function (req, res) {
     var hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
     mysql.query('SELECT * FROM `user` WHERE `email` = "' + req.body.email + '"', function (error, results, fields) {
-        if (error) return res.status(500).send({  auth: 500 });
+        if (error) return res.status(500).send({  message: "Internal error" });
         if (results == 0) {
-            return res.status(404).send({  auth: 404 });
+            return res.status(404).send({  message: "User not found" });
         } else {
 
             var passwordIsValid = bcrypt.compareSync(req.body.password, results[0].password);

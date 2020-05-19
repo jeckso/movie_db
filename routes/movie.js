@@ -26,6 +26,49 @@ router.get('/', function (req, res) {
         ' \n' +
         ';\n' +
         ' \n', function (error, results, fields) {
+            if (error) return res.status(404).send({  message: "User not found" });
+            results.forEach(function(item,i,results){
+                var temps =results[i].genre_ids;
+                var arr = temps.split(",");
+                arr.forEach(function(item,j,arr){
+                    arr[j]=parseInt(arr[j]);
+                })
+                results[i].genre_ids = arr;
+            })
+            var o = {} // empty Object
+            var key = 'results';
+            o["page"] =1;
+            o["total_results"] =results.length;
+            o["total_pages"] =1;
+
+            o[key] = results; // empty Array, which you can push() values into
+            console.log(o[key]);
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
+            res.send(JSON.stringify(o));
+            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+        });
+});
+router.get('/genre/:id', function (req, res) {
+    var id = req.params.id;
+    mysql.query(
+        "SELECT\n" +
+        "  movies.movie_id AS 'id',\n" +
+        "  AVG(DISTINCT movie_ratings.rating) AS 'vote_average',\n" +
+        "  movies.poster_url AS 'poster_path',\n" +
+        "  movies.title AS 'original_title',\n" +
+        "  group_concat(DISTINCT movie_genres.genres_genre_id) AS genre_ids,\n" +
+        "  movies.overview AS 'overview',\n" +
+        "  movies.release_date AS 'release_date'\n" +
+        "FROM\n" +
+        "  (\n" +
+        "    movies\n" +
+        "    INNER JOIN movie_ratings ON movies.movie_id = movie_ratings.movie_id\n" +
+        "  )\n" +
+        "  INNER JOIN movie_genres ON movies.movie_id = movie_genres.movies_movie_id\n" +
+        " \n" +
+        "GROUP BY\n" +
+        "  movies.movie_id\n" +
+        "   HAVING genre_ids  LIKE "+"'%"+id+"%';", function (error, results, fields) {
             if (error) throw error;
             results.forEach(function(item,i,results){
                 var temps =results[i].genre_ids;
@@ -38,9 +81,52 @@ router.get('/', function (req, res) {
             var o = {} // empty Object
             var key = 'results';
             o["page"] =1;
-            o["total_results"] =2;
+            o["total_results"] =results.length;
             o["total_pages"] =1;
 
+            o[key] = results; // empty Array, which you can push() values into
+            console.log(o[key]);
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
+            res.send(JSON.stringify(o));
+            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+        });
+});
+router.get('/rating/:id', function (req, res) {
+    var id = req.params.id;
+    mysql.query(
+        "SELECT\n" +
+        "  movies.movie_id AS 'id',\n" +
+        "  AVG(DISTINCT movie_ratings.rating) AS 'vote_average',\n" +
+        "  movies.poster_url AS 'poster_path',\n" +
+        "  movies.title AS 'original_title',\n" +
+        "  group_concat(DISTINCT movie_genres.genres_genre_id) AS genre_ids,\n" +
+        "  movies.overview AS 'overview',\n" +
+        "  movies.release_date AS 'release_date'\n" +
+        "FROM\n" +
+        "  (\n" +
+        "    movies\n" +
+        "    INNER JOIN movie_ratings ON movies.movie_id = movie_ratings.movie_id\n" +
+        "  )\n" +
+        "  INNER JOIN movie_genres ON movies.movie_id = movie_genres.movies_movie_id\n" +
+        " \n" +
+        "GROUP BY\n" +
+        "  movies.movie_id\n" +
+        "   HAVING genre_ids  LIKE "+"'%"+id+"%';", function (error, results, fields) {
+            if (error) throw error;
+            results.forEach(function(item,i,results){
+                var temps =results[i].genre_ids;
+                var arr = temps.split(",");
+                arr.forEach(function(item,j,arr){
+                    arr[j]=parseInt(arr[j]);
+                })
+                results[i].genre_ids = arr;
+            })
+            var o = {} // empty Object
+            var key = 'results';
+            o["page"] =1;
+            o["total_results"] =results.length;
+            o["total_pages"] =1;
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
             o[key] = results; // empty Array, which you can push() values into
             console.log(o[key]);
 
@@ -87,7 +173,7 @@ router.get('/:id', function (req, res) {
 
                     var o ={};
                     o = results[0];
-
+                if(results.length == 0)return res.status(404).send({  message: "Not found" });
                     res.send(JSON.stringify(o));
                     //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
             });
@@ -112,6 +198,7 @@ router.get('/:id/reviews', function (req, res) {
 
                     o[key].push(item);
                 })
+                if(results.length == 0)return res.status(404).send({  message: "Not found" });
                 console.log(o[key]);
                     res.send(JSON.stringify(o));
                     //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
@@ -137,6 +224,7 @@ router.get('/:id/participants', function (req, res) {
 
                 o[key].push(item);
             })
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
             console.log(o[key]);
             res.send(JSON.stringify(o));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
@@ -163,6 +251,7 @@ router.get('/:id/reviews', function (req, res) {
                 o[key].push(item);
             })
             console.log(o[key]);
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
             res.send(JSON.stringify(o));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
@@ -173,7 +262,7 @@ router.get('/:id/trailers', function (req, res) {
         "SELECT movies.trailer_key AS 'key'\n" +
         "FROM movies\n" +
         "WHERE movie_id = '"+id+"';", function (error, results, fields) {
-
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
             res.send(JSON.stringify(results));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
