@@ -36,9 +36,26 @@ router.get('/reviews', VerifyToken, function (req, res) {
 
 
     mysql.query(
-        'INSERT INTO `reviews` (`content`, `user_id`, `movie_id`) VALUES ("' + req.body.content + '","' + req.body.decoded + '", "' + req.body.movie_id + '")', function (error, results, fields) {
+        "SELECT reviews.user_id AS 'user_id',\n" +
+        "movies.movie_id AS 'movie_id',\n" +
+        "movies.title AS 'title',\n" +
+        "reviews.content AS 'conten',\n" +
+        "reviews.id as 'id'\n" +
+        "FROM movies INNER JOIN reviews on movies.movie_id =reviews.movie_id\n" +
+        "WHERE reviews.user_id = "+req.body.decoded+";", function (error, results, fields) {
             if (error) throw error;
-            res.send({good: true});
+            var o = {} // empty Object
+            var key = 'results';
+
+            o[key] = []; // empty Array, which you can push() values into
+
+            results.forEach(function(item,i,results){
+
+                o[key].push(item);
+            })
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
+            console.log(o[key]);
+            res.send(JSON.stringify(o));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
