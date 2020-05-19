@@ -96,7 +96,7 @@ router.get('/rating/:id', function (req, res) {
     mysql.query(
         "SELECT\n" +
         "  movies.movie_id AS 'id',\n" +
-        "  AVG(DISTINCT movie_ratings.rating) AS 'vote_average',\n" +
+        "  AVG(DISTINCT movie_ratings.rating) AS vote_average,\n" +
         "  movies.poster_url AS 'poster_path',\n" +
         "  movies.title AS 'original_title',\n" +
         "  group_concat(DISTINCT movie_genres.genres_genre_id) AS genre_ids,\n" +
@@ -111,7 +111,7 @@ router.get('/rating/:id', function (req, res) {
         " \n" +
         "GROUP BY\n" +
         "  movies.movie_id\n" +
-        "   HAVING genre_ids  LIKE "+"'%"+id+"%';", function (error, results, fields) {
+        "   HAVING vote_average  LIKE "+"'%"+id+"%';", function (error, results, fields) {
             if (error) throw error;
             results.forEach(function(item,i,results){
                 var temps =results[i].genre_ids;
@@ -126,7 +126,7 @@ router.get('/rating/:id', function (req, res) {
             o["page"] =1;
             o["total_results"] =results.length;
             o["total_pages"] =1;
-            if(results.length == 0)return res.status(404).send({  message: "Not found" });
+           if(results.length == 0)return res.status(404).send({  message: "Not found" });
             o[key] = results; // empty Array, which you can push() values into
             console.log(o[key]);
 
@@ -230,32 +230,32 @@ router.get('/:id/participants', function (req, res) {
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
-router.get('/:id/reviews', function (req, res) {
-    var id = req.params.id;
-    mysql.query(
-        "SELECT reviews.id AS 'id',\n" +
-        "reviews.content AS 'content',\n" +
-        "user.email AS 'author'\n" +
-        "FROM (reviews INNER JOIN movies ON reviews.movie_id = movies.movie_id)\n" +
-        "INNER JOIN user on reviews.user_id = user.id\n" +
-        "WHERE movies.movie_id ='"+id+"'\n" +
-        ";", function (error, results, fields) {
-            if (error) throw error;
-            var o = {} // empty Object
-            var key = 'results';
-
-            o[key] = []; // empty Array, which you can push() values into
-
-            results.forEach(function(item,i,results){
-
-                o[key].push(item);
-            })
-            console.log(o[key]);
-            if(results.length == 0)return res.status(404).send({  message: "Not found" });
-            res.send(JSON.stringify(o));
-            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
-        });
-});
+// router.get('/:id/reviews', function (req, res) {
+//     var id = req.params.id;
+//     mysql.query(
+//         "SELECT reviews.id AS 'id',\n" +
+//         "reviews.content AS 'content',\n" +
+//         "user.email AS 'author'\n" +
+//         "FROM (reviews INNER JOIN movies ON reviews.movie_id = movies.movie_id)\n" +
+//         "INNER JOIN user on reviews.user_id = user.id\n" +
+//         "WHERE movies.movie_id ='"+id+"'\n" +
+//         ";", function (error, results, fields) {
+//             if (error) throw error;
+//             var o = {} // empty Object
+//             var key = 'results';
+//
+//             o[key] = []; // empty Array, which you can push() values into
+//
+//             results.forEach(function(item,i,results){
+//
+//                 o[key].push(item);
+//             })
+//             console.log(o[key]);
+//             if(results.length == 0)return res.status(404).send({  message: "Not found" });
+//             res.send(JSON.stringify(o));
+//             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+//         });
+// });
 router.get('/:id/trailers', function (req, res) {
     var id = req.params.id;
     mysql.query(
