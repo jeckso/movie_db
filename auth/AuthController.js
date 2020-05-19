@@ -14,22 +14,19 @@ router.use(bodyParser.json());
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var bcrypt = require('bcryptjs');
 var config = require('../config'); // get config file
-router.get('/logout', function(req,res){
-    res.cookie('token', 1,{expires: Date.now()});
-    res.redirect(307, './api/chat/');
-});
+
 router.post('/login', function (req, res) {
     req.header("Access-Control-Allow-Origin", "*");
     req.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Authorization, Content-Type, Accept");
-    var hashedPassword = bcrypt.hashSync(req.body.pass, 8);
+    var hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
-    mysql.query('SELECT * FROM `room` WHERE `name` = "' + req.body.name + '"', function (error, results, fields) {
-        if (error) return res.status(500).send("There was a problem logging in`.");
+    mysql.query('SELECT * FROM `user` WHERE `email` = "' + req.body.email + '"', function (error, results, fields) {
+        if (error) return res.status(500).send({  auth: 500 });
         if (results == 0) {
-            return res.status(404).send("No chat with name ", req.body.name, " found :(");
+            return res.status(404).send({  auth: 404 });
         } else {
 
-            var passwordIsValid = bcrypt.compareSync(req.body.pass, results[0].pass);
+            var passwordIsValid = bcrypt.compareSync(req.body.password, results[0].password);
             if (!passwordIsValid) return res.status(401).send({auth: false, token: null});
 
             var token = jwt.sign({id: results[0].id}, config.secret, {
@@ -77,10 +74,10 @@ router.get('/logout', function (req, res) {
 router.post('/create', function (req, res) {
     req.header("Access-Control-Allow-Origin", "*");
     req.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Authorization, Content-Type, Accept");
-    var hashedPassword = bcrypt.hashSync(req.body.pass, 8);
-    mysql.query('INSERT INTO `room` (`name`, `pass`) VALUES ("' + req.body.name + '", "' + hashedPassword + '")', function (err, user) {
-        if (err) return res.status(409).send("Room already exist`.");
-       return res.status(200).send("success");
+    var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+    mysql.query('INSERT INTO `user` (`email`, `password`) VALUES ("' + req.body.email + '", "' + hashedPassword + '")', function (err, user) {
+        if (err) return res.status(409).send({  registered: false });
+       return res.status(200).send({  registered: true } );
         // res.redirect(307, 'api/chat/private/login/');
         //res.status(200).send("Chat created successfully!");
 

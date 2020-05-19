@@ -117,6 +117,31 @@ router.get('/:id/reviews', function (req, res) {
                     //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
             });
 });
+router.get('/:id/participants', function (req, res) {
+    var id = req.params.id;
+    mysql.query(
+        "SELECT participants.first_name AS 'first_name',\n" +
+        "participants.last_name AS 'last_name',\n" +
+        "role.name AS 'role'\n" +
+        "FROM ((movies INNER JOIN movies_has_participants ON movies.movie_id = movies_has_participants.movies_movie_id)\n" +
+        "INNER JOIN participants ON movies_has_participants.participants_participant_id = participants.participant_id)\n" +
+        "INNER JOIN role ON movies_has_participants.role_role_id = role.role_id\n" +
+        "WHERE movies.movie_id = '"+id+"';", function (error, results, fields) {
+            if (error) throw error;
+            var o = {} // empty Object
+            var key = 'results';
+
+            o[key] = []; // empty Array, which you can push() values into
+
+            results.forEach(function(item,i,results){
+
+                o[key].push(item);
+            })
+            console.log(o[key]);
+            res.send(JSON.stringify(o));
+            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+        });
+});
 router.get('/:id/reviews', function (req, res) {
     var id = req.params.id;
     mysql.query(

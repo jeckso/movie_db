@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var app = express();
-var cors = require('cors')
+var cors = require('cors');
+var VerifyToken = require('../auth/VerifyToken');
 var bodyParser = require("body-parser");
 var fs = require('fs');
 var mysql = require('../database.js');
@@ -22,13 +23,23 @@ router.get('/chat', function (req, res) {
     });
 });
 
-router.post('/', function (req, res) {
+router.post('/rate', VerifyToken, function (req, res) {
 
 
     mysql.query(
-        'INSERT INTO `messages` (`sender_name`, `to_name`, `text_data`) VALUES ("' + req.body.$name + '","all", "' + req.body.$message + '")', function (error, results, fields) {
+        'INSERT INTO `movie_ratings` (`rating`, `user_id`, `movie_id`) VALUES ("' + req.body.rating + '","' + req.body.decoded + '", "' + req.body.movie_id + '")', function (error, results, fields) {
             if (error) throw error;
-            res.send(results);
+            res.send({good: true});
+            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+        });
+});
+router.post('/review', VerifyToken, function (req, res) {
+
+
+    mysql.query(
+        'INSERT INTO `reviews` (`content`, `user_id`, `movie_id`) VALUES ("' + req.body.content + '","' + req.body.decoded + '", "' + req.body.movie_id + '")', function (error, results, fields) {
+            if (error) throw error;
+            res.send({good: true});
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });

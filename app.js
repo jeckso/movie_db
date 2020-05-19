@@ -8,8 +8,9 @@ var logger = require('morgan');
 const bodyparser = require('body-parser');
 
 
-var usersRouter = require('./routes/users');
+var authRouter = require('./auth/AuthController');
 var movieRouter = require('./routes/movie');
+var userRouter = require('./routes/users');
 
 var app = express();
 var mysql = require("mysql");
@@ -18,8 +19,8 @@ app.use(bodyparser.urlencoded({ extended: false }))
 app.use(bodyparser.json())
 
 
-app.use('/api', usersRouter);
-
+app.use('/auth', authRouter);
+app.use('/user', userRouter);
 
 app.use('/movie', movieRouter);
 
