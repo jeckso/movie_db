@@ -48,7 +48,7 @@ router.get('/', function (req, res) {
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
-router.get('/:id/genre', function (req, res) {
+router.get('/genre/:id', function (req, res) {
     var id = req.params.id;
     mysql.query(
         "SELECT\n" +
