@@ -7,44 +7,108 @@ var fs = require('fs');
 var mysql = require('../database.js');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+router.get('/:id', function (req, res) {
+    var id = req.params.id;
+    mysql.query(
+        "SELECT group_concat(DISTINCT genres.genre_id) AS 'genre' ,\n" +
+        "group_concat(DISTINCT genres.genre_name) AS 'genre_name',\n" +
+        "movies.movie_id AS 'id',\n" +
+        "movies.release_date AS 'release_date',\n" +
+        "movies.title AS 'original_title',\n" +
+        "movies.overview AS 'overview',\n" +
+        "movies.runtime AS 'runtime',\n" +
+        "movies.poster_url AS 'poster_path',\n" +
+        "movies.release_date AS 'release_date',\n" +
+        "AVG(DISTINCT movie_ratings.rating) AS 'vote_average'\n" +
+        "FROM ((movies INNER JOIN movie_genres on movies.movie_id = movies_movie_id) INNER JOIN genres on genres_genre_id = genres.genre_id) INNER JOIN movie_ratings ON movies.movie_id = movie_ratings.movie_id\n" +
+        "WHERE movies.movie_id = '"+id+"'\n" +
+        " GROUP BY movies.movie_id;\n" +
+        "\n" +
+        "\n" +
+        "\n", function (error, results, fields) {
+            if (error) throw error;
+            results.forEach(function(item,i,results){
+
+                var temps =results[i].genre;
+                var tempsName =results[i].genre_name;
+                var arrtemp = [];
+                var arr = temps.split(",");
+                var arrName = tempsName.split(",");
+                arr.forEach(function(item,j,arr){
+                    var obj = {};
+                    obj["id"]=parseInt(arr[j])
+                    obj["name"]=arrName[j];
+                    arrtemp.push(obj);
+                })
+                results[i].genre=arrtemp;
+            })
+
+
+            var o ={};
+            o = results[0];
+            if(results.length == 0)return res.status(404).send({  message: "Not found" });
+            res.send(JSON.stringify(o));
+            //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+        });
+});
+
 //Get popular movies
-router.get('/', function (req, res) {
+router.get('', function (req, res) {
+    let genre = req.query.genre;
+    let rating = req.query.rating;
+    var dopQuery = "";
+    if(genre && rating){
+        dopQuery = "HAVING genre  LIKE "+"'%"+genre+"%'" +" AND "+"vote_average  LIKE "+"'%"+rating+"%'";
+    }
+    else if(genre){
+        dopQuery = "HAVING genre  LIKE "+"'%"+genre+"%'";
+    }
+    else if (rating){
+        dopQuery = "HAVING vote_average  LIKE "+"'%"+rating+"%'";
+    }
+
     mysql.query(
         'SELECT movies.movie_id AS \'id\', \n' +
+        'group_concat(DISTINCT genres.genre_id) AS \'genre\' ,\n' +
         'AVG(DISTINCT movie_ratings.rating) AS \'vote_average\',\n' +
         ' movies.poster_url AS \'poster_path\',\n' +
         ' movies.title AS \'original_title\',\n' +
-        ' group_concat(DISTINCT movie_genres.genres_genre_id) AS \'genre_ids\',\n' +
+        ' group_concat(DISTINCT genres.genre_name) AS \'genre_name\',\n' +
         ' movies.overview AS \'overview\',\n' +
         ' movies.release_date AS \'release_date\'\n' +
         ' \n' +
-        ' FROM  (movies INNER JOIN movie_ratings on movies.movie_id = movie_ratings.movie_id)\n' +
+        ' FROM  ((movies INNER JOIN movie_ratings on movies.movie_id = movie_ratings.movie_id)\n' +
         ' INNER JOIN movie_genres\n' +
-        ' on movies.movie_id = movie_genres.movies_movie_id\n' +
+        ' on movies.movie_id = movie_genres.movies_movie_id) INNER JOIN genres ON movie_genres.genres_genre_id = genres.genre_id\n' +
         ' GROUP BY movies.movie_id\n' +
+        dopQuery+
         ' \n' +
         ' \n' +
         ';\n' +
         ' \n', function (error, results, fields) {
-            if (error) return res.status(404).send({  message: "User not found" });
-            results.forEach(function(item,i,results){
-                var temps =results[i].genre_ids;
-                var arr = temps.split(",");
-                arr.forEach(function(item,j,arr){
-                    arr[j]=parseInt(arr[j]);
-                })
-                results[i].genre_ids = arr;
-            })
-            var o = {} // empty Object
-            var key = 'results';
-            o["page"] =1;
-            o["total_results"] =results.length;
-            o["total_pages"] =1;
+            console.log(results);
+            console.log(error);
+            if (error) return res.status(404).send({  message: "Not found" });
 
-            o[key] = results; // empty Array, which you can push() values into
-            console.log(o[key]);
+            results.forEach(function(item,i,results){
+
+                var temps =results[i].genre;
+                var tempsName =results[i].genre_name;
+                var arrtemp = [];
+                var arr = temps.split(",");
+                var arrName = tempsName.split(",");
+                arr.forEach(function(item,j,arr){
+                    var obj = {};
+                    obj["id"]=parseInt(arr[j])
+                    obj["name"]=arrName[j];
+                    arrtemp.push(obj);
+                })
+                results[i].genre=arrtemp;
+            })
+
+
             if(results.length == 0)return res.status(404).send({  message: "Not found" });
-            res.send(JSON.stringify(o));
+            res.send(JSON.stringify(results));
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
@@ -91,6 +155,7 @@ router.get('/genre/:id', function (req, res) {
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
+
 router.get('/rating/:id', function (req, res) {
     var id = req.params.id;
     mysql.query(
@@ -134,50 +199,7 @@ router.get('/rating/:id', function (req, res) {
             //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
         });
 });
-router.get('/:id', function (req, res) {
-        var id = req.params.id;
-        mysql.query(
-            "SELECT group_concat(DISTINCT genres.genre_id) AS 'genre' ,\n" +
-            "group_concat(DISTINCT genres.genre_name) AS 'genre_name',\n" +
-            "movies.movie_id AS 'id',\n" +
-            "movies.release_date AS 'release_date',\n" +
-            "movies.title AS 'original_title',\n" +
-            "movies.overview AS 'overview',\n" +
-            "movies.runtime AS 'runtime',\n" +
-            "movies.poster_url AS 'poster_path',\n" +
-            "movies.release_date AS 'release_date',\n" +
-            "AVG(DISTINCT movie_ratings.rating) AS 'vote_average'\n" +
-            "FROM ((movies INNER JOIN movie_genres on movies.movie_id = movies_movie_id) INNER JOIN genres on genres_genre_id = genres.genre_id) INNER JOIN movie_ratings ON movies.movie_id = movie_ratings.movie_id\n" +
-            "WHERE movies.movie_id = '"+id+"'\n" +
-            " GROUP BY movies.movie_id;\n" +
-            "\n" +
-            "\n" +
-            "\n", function (error, results, fields) {
-                    if (error) throw error;
-                    results.forEach(function(item,i,results){
 
-                            var temps =results[i].genre;
-                            var tempsName =results[i].genre_name;
-                            var arrtemp = [];
-                            var arr = temps.split(",");
-                            var arrName = tempsName.split(",");
-                            arr.forEach(function(item,j,arr){
-                                    var obj = {};
-                                    obj["id"]=parseInt(arr[j])
-                                    obj["name"]=arrName[j];
-                                    arrtemp.push(obj);
-                            })
-                            results[i].genre=arrtemp;
-                    })
-
-
-                    var o ={};
-                    o = results[0];
-                if(results.length == 0)return res.status(404).send({  message: "Not found" });
-                    res.send(JSON.stringify(o));
-                    //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
-            });
-});
 router.get('/:id/reviews', function (req, res) {
         var id = req.params.id;
         mysql.query(
