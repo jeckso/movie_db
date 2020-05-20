@@ -29,7 +29,7 @@ router.post('/rate', VerifyToken, function (req, res) {
 
                     if (item.movie_id.toString() === req.body.movie_id) {
 
-                        res.send({message: "Already exist"});
+                        res.status(409).send({message: "Already exist"});
                         req.body.exist = true;
 
                         throw BreakException;
@@ -44,7 +44,7 @@ router.post('/rate', VerifyToken, function (req, res) {
                 mysql.query(
                     'INSERT INTO `movie_ratings` (`rating`, `user_id`, `movie_id`) VALUES ("' + req.body.rating + '","' + req.body.decoded + '", "' + req.body.movie_id + '")', function (error, results, fields) {
                         if (error) throw error;
-                        res.send({message:"ok"});
+                        res.status(200).send({message:"ok"});
                         //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
                     });
 
@@ -73,7 +73,7 @@ router.post('/review', VerifyToken, function (req, res) {
 
                     if (item.movie_id.toString() === req.body.movie_id) {
 
-                        res.send({message: "Already exist"});
+                        res.status(409).send({message: "Already exist"});
                         req.body.exist = true;
 
                         throw BreakException;
@@ -88,7 +88,7 @@ router.post('/review', VerifyToken, function (req, res) {
                 mysql.query(
                     'INSERT INTO `reviews` (`content`, `user_id`, `movie_id`) VALUES ("' + req.body.content + '","' + req.body.decoded + '", "' + req.body.movie_id + '")', function (error, results, fields) {
                         if (error) throw error;
-                        res.send({message: "ok"});
+                        res.status(200).send({message: "ok"});
                         //res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
                     });
 
