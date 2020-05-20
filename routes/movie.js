@@ -56,6 +56,7 @@ router.get('/:id', function (req, res) {
 router.get('', function (req, res) {
     let genre = req.query.genre;
     let rating = req.query.rating;
+    let name = req.query.name;
     var dopQuery = "";
     if(genre && rating){
         dopQuery = "HAVING genre  LIKE "+"'%"+genre+"%'" +" AND "+"vote_average  LIKE "+"'%"+rating+"%'";
@@ -66,7 +67,9 @@ router.get('', function (req, res) {
     else if (rating){
         dopQuery = "HAVING vote_average  LIKE "+"'%"+rating+"%'";
     }
-
+    else if(name){
+        dopQuery = "HAVING original_title  LIKE "+"'%"+name+"%'";
+    }
     mysql.query(
         'SELECT movies.movie_id AS \'id\', \n' +
         'group_concat(DISTINCT genres.genre_id) AS \'genre\' ,\n' +
