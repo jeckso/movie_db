@@ -13,7 +13,7 @@ router.get('/', function (req, res) {
 
     mysql.query(
 
-        "  SELECT * FROM genres;", function (error, results, fields) {
+        "  SELECT genre_name AS 'name', genre_id AS 'id' FROM genres;", function (error, results, fields) {
             console.log(results);
             // if (error) throw error;
             // results.forEach(function(item,i,results){
