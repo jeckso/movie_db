@@ -7,7 +7,7 @@ var fs = require('fs');
 var mysql = require('../database.js');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-router.get('/one/:id', function (req, res) {
+router.get('/:id', function (req, res) {
     var id = req.params.id;
     mysql.query(
         "SELECT group_concat(DISTINCT genres.genre_id) AS 'genre' ,\n" +
